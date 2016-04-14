@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MyNotification</string>
+    <string name="hello_world">Hello World!</string>
+    <string name="notify">发布消息</string>
+</resources>
