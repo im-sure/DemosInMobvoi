@@ -3,7 +3,9 @@ package com.example.chentingshuo.myapplist;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +15,8 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
-    private Item item;
+    private final String TAG = "MainActivity";
+    private Item[] item;
     private RecyclerView recyclerView;
     private AppListAdapter appListAdapter;
 
@@ -22,11 +25,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        item = new Item("hello world");
+        item = new Item[]{new Item("one"), new Item("two")};
 
         appListAdapter = new AppListAdapter(this, item);
 
         recyclerView = (RecyclerView) findViewById(R.id.listview);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(appListAdapter);
 
 
@@ -36,12 +40,14 @@ public class MainActivity extends Activity {
     public class AppListAdapter extends RecyclerView.Adapter<ViewHolder> implements OnItemClickListener{
 
 
+        Context context;
 
         private final LayoutInflater inflater;
 
-        private Item item;
+        private Item[] item;
 
-        public AppListAdapter(Context context, Item item) {
+        public AppListAdapter(Context context, Item[] item) {
+            this.context = context;
             this.inflater = LayoutInflater.from(context);
             this.item = item;
         }
@@ -55,12 +61,13 @@ public class MainActivity extends Activity {
         public void onBindViewHolder(ViewHolder holder, int position) {
 
             holder.icon.setImageResource(R.mipmap.ic_launcher);
-            holder.title.setText(item.title);
+            holder.title.setText(item[position].title);
+            Log.d(TAG, "Current thread is " + Thread.currentThread().getId());
         }
 
         @Override
         public int getItemCount() {
-            return 0;
+            return item == null ? 0 : item.length;
         }
 
         @Override
@@ -75,7 +82,7 @@ public class MainActivity extends Activity {
 
         @Override
         public void onItemClick(View view) {
-            Toast.makeText(MainActivity.this, "touch me", Toast.LENGTH_SHORT);
+            Toast.makeText(MainActivity.this, "touch me", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -90,6 +97,7 @@ public class MainActivity extends Activity {
             this.icon = (ImageView) itemview.findViewById(R.id.icon);
             this.title = (TextView) itemview.findViewById(R.id.title);
             this.listener = listener;
+            itemview.setOnClickListener(this);
         }
 
         @Override
