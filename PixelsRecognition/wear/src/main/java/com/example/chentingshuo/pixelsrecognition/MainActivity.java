@@ -1,64 +1,60 @@
 package com.example.chentingshuo.pixelsrecognition;
 
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.wearable.activity.WearableActivity;
-import android.support.wearable.view.BoxInsetLayout;
-import android.view.View;
-import android.widget.TextView;
+import android.util.Log;
+import android.widget.ImageView;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+public class MainActivity extends Activity {
 
-public class MainActivity extends WearableActivity {
-
-    private static final SimpleDateFormat AMBIENT_DATE_FORMAT =
-            new SimpleDateFormat("HH:mm", Locale.US);
-
-    private BoxInsetLayout mContainerView;
-    private TextView mTextView;
-    private TextView mClockView;
+    private static final String TAG = "PixelsRecognition";
+    private ImageView img_1, img_2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setAmbientEnabled();
 
-        mContainerView = (BoxInsetLayout) findViewById(R.id.container);
-        mTextView = (TextView) findViewById(R.id.text);
-        mClockView = (TextView) findViewById(R.id.clock);
+        img_1 = (ImageView) findViewById(R.id.img_1);
+        img_2 = (ImageView) findViewById(R.id.img_2);
+        img_1.setImageDrawable(pixelsRecognition(R.drawable.ic_app_timer));
+        img_2.setImageDrawable(pixelsRecognition(R.drawable.ic_alipay));
     }
 
-    @Override
-    public void onEnterAmbient(Bundle ambientDetails) {
-        super.onEnterAmbient(ambientDetails);
-        updateDisplay();
-    }
+    private Drawable pixelsRecognition (int imgID) {
 
-    @Override
-    public void onUpdateAmbient() {
-        super.onUpdateAmbient();
-        updateDisplay();
-    }
+        Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), imgID);
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int[] pixels = new int[width * height];
+        int pixelNum = 0;
+        Matrix matrix = new Matrix();
 
-    @Override
-    public void onExitAmbient() {
-        updateDisplay();
-        super.onExitAmbient();
-    }
+        bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+        for (int i = 0; i < pixels.length; i++) {
+            int color = pixels[i];
+            int alpha = Color.alpha(color);
 
-    private void updateDisplay() {
-        if (isAmbient()) {
-            mContainerView.setBackgroundColor(getResources().getColor(android.R.color.black));
-            mTextView.setTextColor(getResources().getColor(android.R.color.white));
-            mClockView.setVisibility(View.VISIBLE);
-
-            mClockView.setText(AMBIENT_DATE_FORMAT.format(new Date()));
-        } else {
-            mContainerView.setBackground(null);
-            mTextView.setTextColor(getResources().getColor(android.R.color.black));
-            mClockView.setVisibility(View.GONE);
+            if (i%100 == 0){
+                Log.d(TAG, "color is " + color);}
+            if (alpha != 0) {
+                pixelNum++;
+            }
         }
+        Log.d(TAG, "pixels.length is " + pixels.length);
+        Log.d(TAG, "pixelNum is " + pixelNum);
+        if (pixelNum >(pixels.length * 0.8)) {
+            matrix.postScale(0.8f, 0.8f);
+            Bitmap newBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+            return new BitmapDrawable(newBitmap);
+        }
+        return new BitmapDrawable(bitmap);
     }
+
 }
