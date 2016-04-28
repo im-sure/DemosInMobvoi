@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
         img_1 = (ImageView) findViewById(R.id.img_1);
         img_2 = (ImageView) findViewById(R.id.img_2);
         img_1.setImageDrawable(pixelsRecognition(R.drawable.ic_app_timer));
-        img_2.setImageDrawable(pixelsRecognition(R.drawable.ic_alipay));
+        img_2.setImageDrawable(pixelsRecognition(R.drawable.ic_ganji_life));
     }
 
     private Drawable pixelsRecognition (int imgID) {

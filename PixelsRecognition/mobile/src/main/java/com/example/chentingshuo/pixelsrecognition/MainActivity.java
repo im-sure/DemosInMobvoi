@@ -40,20 +40,20 @@ public class MainActivity extends Activity {
         for (int i = 0; i < pixels.length; i++) {
             int color = pixels[i];
             int alpha = Color.alpha(color);
-
-            if (i%100 == 0){
-                Log.d(TAG, "color is " + color);}
             if (alpha != 0) {
                 pixelNum++;
             }
         }
-        Log.d(TAG, "pixels.length is " + pixels.length);
-        Log.d(TAG, "pixelNum is " + pixelNum);
+        Log.d(TAG, "Width is " + width);
+        Log.d(TAG, "Pixels.length is " + pixels.length);
+        Log.d(TAG, "PixelNum is " + pixelNum);
         if (pixelNum >(pixels.length * 0.8)) {
             matrix.postScale(0.8f, 0.8f);
             Bitmap newBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+            Log.d(TAG, "Result is true");
             return new BitmapDrawable(newBitmap);
         }
+        Log.d(TAG, "Result is false");
         return new BitmapDrawable(bitmap);
     }
 
