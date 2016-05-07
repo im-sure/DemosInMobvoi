@@ -9,12 +9,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MainActivity extends Activity {
 
     private static final String TAG = "VolumeGradient";
     private AudioManager audioManager;
-    private int max;
     private MediaPlayer mMediaPlayer;
+    private boolean mIsFirstInTimerTask;
+    private Timer mRingTimer;
+    private int max;
     private int mCurrentVolume;
 
     @Override
@@ -23,8 +28,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        max = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
-        Log.d(TAG, "Max volume is " + max);
         audioManager.setStreamVolume(AudioManager.STREAM_ALARM, 0, 0);
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -44,25 +47,32 @@ public class MainActivity extends Activity {
 
     public void btnStart(View v) {
         try {
-            mCurrentVolume = 0;
             mMediaPlayer.prepare();
-            mMediaPlayer.start();
-            Thread th = new Thread(new Runnable() {
+            max = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
+            mCurrentVolume = 0;
+            mIsFirstInTimerTask = true;
+            mRingTimer = new Timer(true);
+            mRingTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
+                    AudioManager audioManager =
+                            (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                    if (mIsFirstInTimerTask) {
+                        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, 0, 0);
+                        mMediaPlayer.start();
+                        mIsFirstInTimerTask = false;
+                    }
                     try {
-                        while (mMediaPlayer.isPlaying() && mCurrentVolume < max) {
+                        if (mMediaPlayer.isPlaying() && mCurrentVolume < max) {
                             mCurrentVolume++;
                             Log.d(TAG, "Current volume is " + mCurrentVolume);
                             audioManager.setStreamVolume(AudioManager.STREAM_ALARM, mCurrentVolume, 0);
-                            Thread.sleep(200);
                         }
                     } catch (Exception ex) {
                         Log.v(TAG, "Failed to play ringtone: " + ex);
                     }
                 }
-            });
-            th.start();
+            }, 5000, 200);
         } catch (Exception ex) {
             Log.v(TAG, "Failed to play ringtone: " + ex);
         }
@@ -70,5 +80,7 @@ public class MainActivity extends Activity {
 
     public void btnStop(View v) {
         mMediaPlayer.stop();
+        mCurrentVolume = 0;
+        mIsFirstInTimerTask = false;
     }
 }
